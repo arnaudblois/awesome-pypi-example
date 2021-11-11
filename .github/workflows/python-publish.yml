@@ -1,0 +1,25 @@
+name: Upload Python Package
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    container:
+      image: ursamajorlab/impish-python:3.10
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install poetry
+        run: |
+          curl -sSL https://install.python-poetry.org/ | python3 -
+      - name: Add Poetry to PATH
+        run: echo "${HOME}/.local/bin" >> $GITHUB_PATH
+      - name: Install dependencies
+        run: |
+          poetry install
+      - name: Build and publish
+        run: |
+          poetry build
+          poetry publish -u __token__ -p ${{ secrets.PYPI_TOKEN }}
