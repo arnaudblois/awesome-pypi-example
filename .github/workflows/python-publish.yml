@@ -16,9 +16,25 @@ jobs:
           curl -sSL https://install.python-poetry.org/ | python3 -
       - name: Add Poetry to PATH
         run: echo "${HOME}/.local/bin" >> $GITHUB_PATH
+      - name: Set up cache
+        uses: actions/cache@v1
+        id: cache
+        with:
+          path: ${HOME}/.cache/pypoetry/virtualenvs
+          key: venv-${{ runner.os }}-${{ matrix.python_version }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Ensure cache is healthy
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: poetry run pip --version >/dev/null 2>&1 || rm -rf ${HOME}/.cache/pypoetry/virtualenvs
       - name: Install dependencies
         run: |
           poetry install
+      - name: Build doc
+        run: cd docs & make html
+      - name: Deploy Doc
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/_build
       - name: Build and publish
         run: |
           poetry build
