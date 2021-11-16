@@ -27,7 +27,7 @@ jobs:
       - name: Add Poetry to PATH
         run: echo "${HOME}/.local/bin" >> $GITHUB_PATH
       - name: Set up cache
-        uses: actions/cache@v1
+        uses: actions/cache@v2.1.6
         id: cache
         with:
           path: ${HOME}/.cache/pypoetry/virtualenvs
