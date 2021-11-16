@@ -43,9 +43,15 @@ jobs:
         run: poetry run pytest --cov=src/ --cov-report=xml
       - name: Upload coverage
         uses: codecov/codecov-action@v1
-      - name: Build package and publish to test PyPI
-        if: ${{ matrix.python_version }} == "3.10"
+      - name: Build package and publish dry-run to test PyPI
         run: |
           poetry config repositories.test-pypi https://test.pypi.org/legacy/
           poetry build
-          poetry publish -r test-pypi -u __token__ -p ${{ secrets.TEST_PYPI_TOKEN }}
+          poetry publish --dry-run -r test-pypi -u __token__ -p ${{ secrets.TEST_PYPI_TOKEN }}
+      - name: Build doc
+        run: poetry run sphinx-build -M html ./docs/ ./docs/_build
+      - name: Deploy Doc
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/_build
