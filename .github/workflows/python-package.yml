@@ -25,7 +25,7 @@ jobs:
       - name: Add Poetry to PATH
         run: echo "${HOME}/.local/bin" >> $GITHUB_PATH
       - name: Set up cache
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         id: cache
         with:
           path: ${HOME}/.cache/pypoetry/virtualenvs
@@ -42,9 +42,9 @@ jobs:
       - name: Test with pytest
         run: poetry run pytest --cov=src/ --cov-report=xml
       - name: Upload coverage
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v2
       - name: Build package and publish dry-run to test PyPI
         run: |
           poetry config repositories.test-pypi https://test.pypi.org/legacy/
           poetry build
-          poetry publish --dry-run -r test-pypi -u __token__ -p ${{ secrets.TEST_PYPI_TOKEN }}
+          poetry publish --dry-run -r test-pypi -u __token__ -p secret_pypi_token
