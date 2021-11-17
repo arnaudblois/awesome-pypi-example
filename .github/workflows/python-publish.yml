@@ -11,30 +11,37 @@ jobs:
       image: ursamajorlab/impish-python:3.10
     steps:
       - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+        # In all these caching steps we introduce a CACHE_VERSION secret
+        # in the key which is a workaround to the fact that
+        # it's not possible to manually invalidate cache as of Dec 2021.
+        # See issue https://github.com/actions/cache/issues/2 and StackOverflow
+        # https://stackoverflow.com/questions/63521430/clear-cache-in-github-actions
+      - name: Caching Poetry
+        uses: actions/cache@v2
+        id: poetry-cache
+        with:
+          path: ~/.local
+          key: ${{ secrets.CACHE_VERSION }}-poetry-${{ runner.os }}-${{ matrix.python_version }}
       - name: Install poetry
-        run: |
-          curl -sSL https://install.python-poetry.org/ | python3 -
+        if: steps.poetry-cache.outputs.cache-hit != 'true'
+        run: curl -sSL https://install.python-poetry.org/ | python3 -
       - name: Add Poetry to PATH
         run: echo "${HOME}/.local/bin" >> $GITHUB_PATH
-      - name: Set up cache
+      - name: dependency-cache
         uses: actions/cache@v2
-        id: cache
+        id: dependency-cache
         with:
-          path: ${HOME}/.cache/pypoetry/virtualenvs
-          key: venv-${{ runner.os }}-${{ matrix.python_version }}-${{ hashFiles('**/poetry.lock') }}
+          path: ~/.cache/pypoetry
+          key: ${{ secrets.CACHE_VERSION }}-venv-${{ runner.os }}-${{ matrix.python_version }}-${{ hashFiles('**/poetry.lock') }}
       - name: Ensure cache is healthy
-        if: steps.cache.outputs.cache-hit == 'true'
-        run: poetry run pip --version >/dev/null 2>&1 || rm -rf ${HOME}/.cache/pypoetry/virtualenvs
-      - name: Install dependencies
-        run: |
-          poetry install
-      - name: Build doc
-        run: cd docs & make html
-      - name: Deploy Doc
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/_build
+        if: steps.dependency-cache.outputs.cache-hit == 'true'
+        run: poetry run pip --version
+      - name: Install Dependencies
+        run: poetry install
       - name: Build and publish
         run: |
           poetry build
