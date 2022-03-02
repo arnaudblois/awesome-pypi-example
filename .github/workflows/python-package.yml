@@ -18,7 +18,7 @@ jobs:
       matrix:
         python_version: ["3.10"]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         # In all these caching steps we introduce a CACHE_VERSION secret
         # in the key which is a workaround to the fact that
         # it's not possible to manually invalidate cache as of Dec 2021.
