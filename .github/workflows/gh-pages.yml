@@ -26,7 +26,7 @@ jobs:
         # See issue https://github.com/actions/cache/issues/2 and StackOverflow
         # https://stackoverflow.com/questions/63521430/clear-cache-in-github-actions
       - name: Caching Poetry
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: poetry-cache
         with:
           path: ~/.local
@@ -37,7 +37,7 @@ jobs:
       - name: Add Poetry to PATH
         run: echo "${HOME}/.local/bin" >> $GITHUB_PATH
       - name: dependency-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: dependency-cache
         with:
           path: ~/.cache/pypoetry
